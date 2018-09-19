@@ -8,7 +8,7 @@ public class Movement : MonoBehaviour {
     public float xAxis;
     private Rigidbody2D rb;
 
-    public float jumpForce;
+    public float jumpHeight;
 
     void Start()
     {
@@ -24,14 +24,13 @@ public class Movement : MonoBehaviour {
         Vector2 VelocityX = rb.velocity;
         VelocityX.x = xAxis;
         rb.velocity = VelocityX;
-
-        //Max Movement spd
-        if (rb.velocity.magnitude > spd)
-        {
-            rb.velocity *= spd / rb.velocity.magnitude;
-        }
-
         
+
+        //jump
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            rb.AddForce(Vector2.up * jumpHeight);
+        }
 
     }
 }
