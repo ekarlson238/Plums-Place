@@ -67,18 +67,18 @@ public class Movement : MonoBehaviour {
         {
             dashVelocity = xAxis * dashMult;
             
-            rb.constraints = RigidbodyConstraints2D.FreezePositionY;
+            rb.constraints = RigidbodyConstraints2D.FreezePositionY; //freeze y position while dashing
             rb.AddForce(new Vector2(dashVelocity, 0));
             dashing = true;
 
             canDash = false; //can only dash once per jump
         }
 
-        if (!dashing)
+        if (!dashing)//if you're not dashing
         {
             rb.velocity = VelocityX; //sets velocity
         }
-        else
+        else//if you are dashing, continue to dash for dashDuration, then stop dashing
         {
             dashVar -= Time.deltaTime;
             if (dashVar < 0)
