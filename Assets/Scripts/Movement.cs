@@ -55,7 +55,7 @@ public class Movement : MonoBehaviour {
         VelocityX.x = xAxis;
         
         //jump
-        if (Input.GetKeyDown(KeyCode.Space) && grounded)
+        if (Input.GetButton("Jump") && grounded)
         {
             VelocityX.y = jumpHeight; //sets y velocity
             grounded = false;//test to see if already jumping
@@ -63,7 +63,7 @@ public class Movement : MonoBehaviour {
         }
 
         //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
-        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash && Input.GetAxisRaw("Horizontal") != 0)
+        if (Input.GetButton("Fire3") && canDash && Input.GetAxisRaw("Horizontal") != 0)
         {
             dashVelocity = xAxis * dashMult;
             
