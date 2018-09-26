@@ -15,15 +15,24 @@ public class Movement : MonoBehaviour {
 
     private bool grounded;
     private bool canDash;
+    private bool dashing;
 
     [SerializeField]
     private float dashMult;
+
+    private float dashVelocity;
+
+    [SerializeField]
+    private float dashDuration;
+    private float dashVar;
 
     void Start()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
         grounded = true;
         canDash = false;
+        dashing = false;
+        dashVar = dashDuration;
     }
 
     //if the player collides with something tagged ground
@@ -53,15 +62,32 @@ public class Movement : MonoBehaviour {
             canDash = true;//can only dash while jumping
         }
 
-        //press shift to dash
-        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+        //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash && Input.GetAxisRaw("Horizontal") != 0)
         {
-            VelocityX.x = xAxis * dashMult;
+            dashVelocity = xAxis * dashMult;
+            
+            rb.constraints = RigidbodyConstraints2D.FreezePositionY;
+            rb.AddForce(new Vector2(dashVelocity, 0));
+            dashing = true;
 
             canDash = false; //can only dash once per jump
         }
 
-        rb.velocity = VelocityX; //sets velocity
+        if (!dashing)
+        {
+            rb.velocity = VelocityX; //sets velocity
+        }
+        else
+        {
+            dashVar -= Time.deltaTime;
+            if (dashVar < 0)
+            {
+                dashing = false;
+                dashVar = dashDuration;
+                rb.constraints = RigidbodyConstraints2D.None;
+            }
+        }
 
     }//fixedUpdate
 
