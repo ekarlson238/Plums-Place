@@ -422,4 +422,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spd: 7
   jumpHeight: 7
-  dashMult: 27
+  dashMult: 35
+  dashDuration: 0.5
