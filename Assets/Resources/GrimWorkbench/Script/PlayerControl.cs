@@ -54,7 +54,7 @@ public class PlayerControl : MonoBehaviour {
 		modelTransform = GameObject.Find("Model").GetComponent<Transform>();
 
 		mRigidbody2D = GetComponent<Rigidbody2D>();
-		mAnimator = GameObject.Find ("player").transform.FindChild("Model").transform.GetChild(0).gameObject.GetComponent<Animator> ();
+		mAnimator = GameObject.Find ("player").transform.Find("Model").transform.GetChild(0).gameObject.GetComponent<Animator> ();
 		realMaxSpeed = maxSpeed;
 		activeSpeed = minSpeed;
 		mAnimator.SetBool("IsEat", false);
