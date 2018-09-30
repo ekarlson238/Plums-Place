@@ -43,6 +43,7 @@ public class Movement : MonoBehaviour {
         dashing = false;
         dashVar = dashDuration;
         originalConstraints = rb.constraints;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         originalScale = playerSprite.transform.localScale;
     }
 
@@ -60,6 +61,8 @@ public class Movement : MonoBehaviour {
 
     void FixedUpdate()
     {
+        this.transform.eulerAngles = new Vector3(0, 0, 0);
+
         //value for x velocity
         xAxis = Input.GetAxisRaw("Horizontal") * spd;
 
@@ -123,13 +126,13 @@ public class Movement : MonoBehaviour {
 
     void freezeY()
     {
-        rb.constraints = RigidbodyConstraints2D.FreezePositionY;
+        rb.constraints = originalConstraints;
     }
 
     void unfreezeY()
     {
-        rb.constraints = originalConstraints;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
-    
+
 
 }
