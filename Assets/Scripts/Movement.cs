@@ -26,6 +26,15 @@ public class Movement : MonoBehaviour {
     private float dashDuration;
     private float dashVar;
 
+    private RigidbodyConstraints2D originalConstraints;
+
+    [SerializeField]
+    private Animator animator;
+
+    [SerializeField]
+    private GameObject playerSprite;
+    private Vector3 originalScale;
+
     void Start()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
@@ -33,6 +42,8 @@ public class Movement : MonoBehaviour {
         canDash = false;
         dashing = false;
         dashVar = dashDuration;
+        originalConstraints = rb.constraints;
+        originalScale = playerSprite.transform.localScale;
     }
 
     //if the player collides with something tagged ground
@@ -42,6 +53,8 @@ public class Movement : MonoBehaviour {
         {
             grounded = true; //let me jump again
             canDash = false; //can't dash if grounded
+
+            animator.SetBool("isJumping", false);
         }
     }
 
@@ -60,23 +73,38 @@ public class Movement : MonoBehaviour {
             VelocityX.y = jumpHeight; //sets y velocity
             grounded = false;//test to see if already jumping
             canDash = true;//can only dash while jumping
+
+            animator.SetBool("isJumping", true);
         }
 
         //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
         if (Input.GetButton("Fire3") && canDash && Input.GetAxisRaw("Horizontal") != 0)
         {
             dashVelocity = xAxis * dashMult;
-            
-            rb.constraints = RigidbodyConstraints2D.FreezePositionY; //freeze y position while dashing
+
+            freezeY(); //freeze y position while dashing
             rb.AddForce(new Vector2(dashVelocity, 0));
             dashing = true;
 
             canDash = false; //can only dash once per jump
+
+            animator.SetBool("isDashing", true);
         }
 
         if (!dashing)//if you're not dashing
         {
             rb.velocity = VelocityX; //sets velocity
+            animator.SetFloat("Speed", Mathf.Abs(VelocityX.x));
+
+            if (Input.GetAxisRaw("Horizontal") < 0)
+            {
+                playerSprite.transform.localScale = new Vector3(-(originalScale.x), originalScale.y, originalScale.z);
+            }
+            else if (Input.GetAxisRaw("Horizontal") > 0)
+            {
+                playerSprite.transform.localScale = originalScale;
+            }
+
         }
         else//if you are dashing, continue to dash for dashDuration, then stop dashing
         {
@@ -85,12 +113,23 @@ public class Movement : MonoBehaviour {
             {
                 dashing = false;
                 dashVar = dashDuration;
-                rb.constraints = RigidbodyConstraints2D.None;
+                unfreezeY();
+
+                animator.SetBool("isDashing", false);
             }
         }
 
     }//fixedUpdate
 
+    void freezeY()
+    {
+        rb.constraints = RigidbodyConstraints2D.FreezePositionY;
+    }
+
+    void unfreezeY()
+    {
+        rb.constraints = originalConstraints;
+    }
     
 
 }
