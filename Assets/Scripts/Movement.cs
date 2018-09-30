@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Movement : MonoBehaviour {
 
@@ -46,6 +47,7 @@ public class Movement : MonoBehaviour {
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         originalScale = playerSprite.transform.localScale;
     }
+    
 
     //if the player collides with something tagged ground
     private void OnCollisionEnter2D(Collision2D collision)
@@ -57,6 +59,27 @@ public class Movement : MonoBehaviour {
 
             animator.SetBool("isJumping", false);
         }
+
+
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "dashThrough" && !dashing) //if hits laser without dashing
+        {
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        if (collision.gameObject.tag == "Water") //if touches water
+        {
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        if (collision.gameObject.tag == "Coin") //if touches coin
+        {
+
+        }
+
     }
 
     void FixedUpdate()
