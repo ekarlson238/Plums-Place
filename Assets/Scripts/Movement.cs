@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class Movement : MonoBehaviour {
 
     [SerializeField]
-    private float spd;
+    private float speed;
 
     private float xAxis;
     private Rigidbody2D rb;
@@ -80,11 +80,8 @@ public class Movement : MonoBehaviour {
 
     void FixedUpdate()
     {
-        //rotation
-        this.transform.eulerAngles = new Vector3(0, 0, 0);
-
         //value for x velocity
-        xAxis = Input.GetAxisRaw("Horizontal") * spd;
+        xAxis = Input.GetAxisRaw("Horizontal") * speed;
 
         //set object's x velocity to xAxis
         Vector2 VelocityX = rb.velocity;
@@ -105,7 +102,7 @@ public class Movement : MonoBehaviour {
         {
             dashVelocity = xAxis * dashMult;
 
-            freezeY(); //freeze y position while dashing
+            FreezeY(); //freeze y position while dashing
             rb.AddForce(new Vector2(dashVelocity, 0));
             dashing = true;
 
@@ -136,7 +133,7 @@ public class Movement : MonoBehaviour {
             {
                 dashing = false;
                 dashVar = dashDuration;
-                unfreezeY();
+                UnfreezeY();
 
                 animator.SetBool("isDashing", false);
             }
@@ -144,12 +141,12 @@ public class Movement : MonoBehaviour {
 
     }//fixedUpdate
 
-    void freezeY()
+    void FreezeY()
     {
         rb.constraints = RigidbodyConstraints2D.FreezeRotation| RigidbodyConstraints2D.FreezePositionY;
     }
 
-    void unfreezeY()
+    void UnfreezeY()
     {
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
