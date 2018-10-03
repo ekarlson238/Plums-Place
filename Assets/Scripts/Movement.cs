@@ -7,6 +7,8 @@ public class Movement : MonoBehaviour {
 
     [SerializeField]
     private float speed;
+    private float speedSave;
+    private float halfSpeed;
 
     private float xAxis;
     private Rigidbody2D rb;
@@ -36,7 +38,7 @@ public class Movement : MonoBehaviour {
 
     [SerializeField]
     private Collider2D groundDetectTrigger;
-    private Collider2D[] groundHitDetectionResults;
+    private Collider2D[] groundHitDetectionResults = new Collider2D[16];
 
     [SerializeField]
     private ContactFilter2D groundContactFilter;
@@ -53,23 +55,9 @@ public class Movement : MonoBehaviour {
         originalScale = playerSprite.transform.localScale;
 
         velocity = rb.velocity;
+        speedSave = speed;
+        halfSpeed = speed / 2;
     }
-    
-    /*
-    //if the player collides with something tagged ground
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.tag == "Ground")
-        {
-            grounded = true; //let me jump again
-            canDash = false; //can't dash if grounded
-
-            animator.SetBool("isJumping", false);
-        }
-
-
-    }
-    */
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -92,6 +80,8 @@ public class Movement : MonoBehaviour {
 
     void FixedUpdate()
     {
+        UpdateGrounded();
+
         SetHorizontalVelocity();
 
         Jump();
@@ -101,6 +91,24 @@ public class Movement : MonoBehaviour {
         MovementDependingOnIfDashing();
 
     }//fixedUpdate
+
+    private void UpdateGrounded()
+    {
+        grounded = groundDetectTrigger.OverlapCollider(groundContactFilter, groundHitDetectionResults) > 0;
+        //Debug.Log("grounded =" + grounded);
+
+        if (grounded)
+        {
+            canDash = false; //can't dash if grounded
+
+            animator.SetBool("isJumping", false);
+            speed = speedSave;
+        }
+        else
+        {
+            speed = halfSpeed;
+        }
+    }
 
     private void MovementDependingOnIfDashing()
     {
@@ -143,7 +151,7 @@ public class Movement : MonoBehaviour {
         //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
         if (Input.GetButton("Fire3") && canDash && Input.GetAxisRaw("Horizontal") != 0)
         {
-            dashVelocity = xAxis * dashsSpeedMultiplier;
+            dashVelocity = Input.GetAxisRaw("Horizontal") * speedSave * dashsSpeedMultiplier;
 
             FreezeY(); //freeze y position while dashing
             rb.AddForce(new Vector2(dashVelocity, 0));

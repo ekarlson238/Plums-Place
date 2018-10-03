@@ -548,8 +548,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 7
   jumpHeight: 11.5
-  dashMult: 45
-  dashDuration: 0.5
+  dashsSpeedMultiplier: 75
+  dashDurationSave: 0.75
   animator: {fileID: 1968593120}
   playerSprite: {fileID: 263006757}
   groundDetectTrigger: {fileID: 263006763}
@@ -1188,7 +1188,7 @@ GameObject:
   - component: {fileID: 428605216}
   - component: {fileID: 428605215}
   - component: {fileID: 428605214}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Platforms
   m_TagString: Ground
   m_Icon: {fileID: 0}
