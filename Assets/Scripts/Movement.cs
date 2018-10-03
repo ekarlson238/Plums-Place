@@ -34,6 +34,15 @@ public class Movement : MonoBehaviour {
     private GameObject playerSprite;
     private Vector3 originalScale;
 
+    [SerializeField]
+    private Collider2D groundDetectTrigger;
+    private Collider2D[] groundHitDetectionResults;
+
+    [SerializeField]
+    private ContactFilter2D groundContactFilter;
+
+    private Vector2 velocity;
+
     void Start()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
@@ -42,9 +51,11 @@ public class Movement : MonoBehaviour {
         dashing = false;
         dashVar = dashDuration;
         originalScale = playerSprite.transform.localScale;
+
+        velocity = rb.velocity;
     }
     
-
+    /*
     //if the player collides with something tagged ground
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -58,6 +69,7 @@ public class Movement : MonoBehaviour {
 
 
     }
+    */
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -80,50 +92,24 @@ public class Movement : MonoBehaviour {
 
     void FixedUpdate()
     {
-        //value for x velocity
-        xAxis = Input.GetAxisRaw("Horizontal") * speed;
+        SetHorizontalVelocity();
 
-        //set object's x velocity to xAxis
-        Vector2 VelocityX = rb.velocity;
-        VelocityX.x = xAxis;
-        
-        //jump
-        if (Input.GetButton("Jump") && grounded)
-        {
-            VelocityX.y = jumpHeight; //sets y velocity
-            grounded = false;//test to see if already jumping
-            canDash = true;//can only dash while jumping
+        Jump();
 
-            animator.SetBool("isJumping", true);
-        }
+        Dash();
 
-        //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
-        if (Input.GetButton("Fire3") && canDash && Input.GetAxisRaw("Horizontal") != 0)
-        {
-            dashVelocity = xAxis * dashMult;
+        MovementDependingOnIfDashing();
 
-            FreezeY(); //freeze y position while dashing
-            rb.AddForce(new Vector2(dashVelocity, 0));
-            dashing = true;
+    }//fixedUpdate
 
-            canDash = false; //can only dash once per jump
-
-            animator.SetBool("isDashing", true);
-        }
-
+    private void MovementDependingOnIfDashing()
+    {
         if (!dashing)//if you're not dashing
         {
-            rb.velocity = VelocityX; //sets velocity
-            animator.SetFloat("Speed", Mathf.Abs(VelocityX.x));
+            rb.velocity = velocity; //sets velocity
+            animator.SetFloat("Speed", Mathf.Abs(velocity.x));
 
-            if (Input.GetAxisRaw("Horizontal") < 0)
-            {
-                playerSprite.transform.localScale = new Vector3(-(originalScale.x), originalScale.y, originalScale.z);
-            }
-            else if (Input.GetAxisRaw("Horizontal") > 0)
-            {
-                playerSprite.transform.localScale = originalScale;
-            }
+            MirrorPlayerSprite();
 
         }
         else//if you are dashing, continue to dash for dashDuration, then stop dashing
@@ -138,8 +124,59 @@ public class Movement : MonoBehaviour {
                 animator.SetBool("isDashing", false);
             }
         }
+    }
 
-    }//fixedUpdate
+    private void MirrorPlayerSprite()
+    {
+        if (Input.GetAxisRaw("Horizontal") < 0)
+        {
+            playerSprite.transform.localScale = new Vector3(-(originalScale.x), originalScale.y, originalScale.z);
+        }
+        else if (Input.GetAxisRaw("Horizontal") > 0)
+        {
+            playerSprite.transform.localScale = originalScale;
+        }
+    }
+
+    private void Dash()
+    {
+        //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
+        if (Input.GetButton("Fire3") && canDash && Input.GetAxisRaw("Horizontal") != 0)
+        {
+            dashVelocity = xAxis * dashMult;
+
+            FreezeY(); //freeze y position while dashing
+            rb.AddForce(new Vector2(dashVelocity, 0));
+            dashing = true;
+
+            canDash = false; //can only dash once per jump
+
+            animator.SetBool("isDashing", true);
+        }
+    }
+
+    private void Jump()
+    {
+        //jump
+        if (Input.GetButton("Jump") && grounded)
+        {
+            velocity.y = jumpHeight; //sets y velocity
+            grounded = false;//test to see if already jumping
+            canDash = true;//can only dash while jumping
+
+            animator.SetBool("isJumping", true);
+        }
+    }
+
+    private void SetHorizontalVelocity()
+    {
+        //value for x velocity
+        xAxis = Input.GetAxisRaw("Horizontal") * speed;
+
+        //set object's x velocity to xAxis
+        velocity = rb.velocity;
+        velocity.x = xAxis;
+    }
 
     void FreezeY()
     {
