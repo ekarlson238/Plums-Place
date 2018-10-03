@@ -19,13 +19,13 @@ public class Movement : MonoBehaviour {
     private bool dashing;
 
     [SerializeField]
-    private float dashMult;
+    private float dashsSpeedMultiplier;
 
     private float dashVelocity;
 
     [SerializeField]
+    private float dashDurationSave;
     private float dashDuration;
-    private float dashVar;
     
     [SerializeField]
     private Animator animator;
@@ -49,7 +49,7 @@ public class Movement : MonoBehaviour {
         grounded = true;
         canDash = false;
         dashing = false;
-        dashVar = dashDuration;
+        dashDuration = dashDurationSave;
         originalScale = playerSprite.transform.localScale;
 
         velocity = rb.velocity;
@@ -114,11 +114,11 @@ public class Movement : MonoBehaviour {
         }
         else//if you are dashing, continue to dash for dashDuration, then stop dashing
         {
-            dashVar -= Time.deltaTime;
-            if (dashVar < 0)
+            dashDuration -= Time.deltaTime;
+            if (dashDuration < 0)
             {
                 dashing = false;
-                dashVar = dashDuration;
+                dashDuration = dashDurationSave;
                 UnfreezeY();
 
                 animator.SetBool("isDashing", false);
@@ -143,7 +143,7 @@ public class Movement : MonoBehaviour {
         //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
         if (Input.GetButton("Fire3") && canDash && Input.GetAxisRaw("Horizontal") != 0)
         {
-            dashVelocity = xAxis * dashMult;
+            dashVelocity = xAxis * dashsSpeedMultiplier;
 
             FreezeY(); //freeze y position while dashing
             rb.AddForce(new Vector2(dashVelocity, 0));
