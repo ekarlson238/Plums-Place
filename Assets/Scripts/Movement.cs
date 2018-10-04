@@ -45,6 +45,8 @@ public class Movement : MonoBehaviour {
 
     private Vector2 velocity;
 
+    private float horizontalRawAxisValue;
+
     void Start()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
@@ -57,6 +59,8 @@ public class Movement : MonoBehaviour {
         velocity = rb.velocity;
         speedSave = speed;
         halfSpeed = speed / 2;
+
+        horizontalRawAxisValue = 1;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -99,7 +103,7 @@ public class Movement : MonoBehaviour {
 
         if (grounded)
         {
-            canDash = false; //can't dash if grounded
+            canDash = true; //landing on ground resets dash
 
             animator.SetBool("isJumping", false);
             speed = speedSave;
@@ -107,6 +111,7 @@ public class Movement : MonoBehaviour {
         else
         {
             speed = halfSpeed;
+            animator.SetBool("isJumping", true);
         }
     }
 
@@ -139,19 +144,21 @@ public class Movement : MonoBehaviour {
         if (Input.GetAxisRaw("Horizontal") < 0)
         {
             playerSprite.transform.localScale = new Vector3(-(originalScale.x), originalScale.y, originalScale.z);
+            horizontalRawAxisValue = Input.GetAxisRaw("Horizontal");
         }
         else if (Input.GetAxisRaw("Horizontal") > 0)
         {
             playerSprite.transform.localScale = originalScale;
+            horizontalRawAxisValue = Input.GetAxisRaw("Horizontal");
         }
     }
 
     private void Dash()
     {
         //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
-        if (Input.GetButton("Fire3") && canDash && Input.GetAxisRaw("Horizontal") != 0)
+        if (Input.GetButton("Fire3") && canDash && !grounded)
         {
-            dashVelocity = Input.GetAxisRaw("Horizontal") * speedSave * dashsSpeedMultiplier;
+            dashVelocity = horizontalRawAxisValue * speedSave * dashsSpeedMultiplier;
 
             FreezeY(); //freeze y position while dashing
             rb.AddForce(new Vector2(dashVelocity, 0));
@@ -169,10 +176,6 @@ public class Movement : MonoBehaviour {
         if (Input.GetButton("Jump") && grounded)
         {
             velocity.y = jumpHeight; //sets y velocity
-            grounded = false;//test to see if already jumping
-            canDash = true;//can only dash while jumping
-
-            animator.SetBool("isJumping", true);
         }
     }
 
