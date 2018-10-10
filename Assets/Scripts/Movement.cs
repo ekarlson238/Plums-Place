@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Movement : MonoBehaviour {
 
@@ -74,12 +75,7 @@ public class Movement : MonoBehaviour {
         {
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
         }
-
-        if (collision.gameObject.tag == "Coin") //if touches coin
-        {
-
-        }
-
+        
     }
 
     void FixedUpdate()
