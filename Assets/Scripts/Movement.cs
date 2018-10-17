@@ -48,6 +48,9 @@ public class Movement : MonoBehaviour {
 
     private float horizontalRawAxisValue;
 
+    [SerializeField]
+    private GameObject shield;
+
     void Start()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
@@ -88,9 +91,23 @@ public class Movement : MonoBehaviour {
 
         Dash();
 
+        DashShield();
+
         MovementDependingOnIfDashing();
 
     }//fixedUpdate
+
+    private void DashShield()
+    {
+        if (dashing)
+        {
+            shield.GetComponent<SpriteRenderer>().enabled = true;
+        }
+        else
+        {
+            shield.GetComponent<SpriteRenderer>().enabled = false;
+        }
+    }
 
     private void UpdateGrounded()
     {
