@@ -186,7 +186,7 @@ public class Movement : MonoBehaviour {
     private void Jump()
     {
         //jump
-        if (Input.GetButton("Jump") && grounded)
+        if (Input.GetButtonDown("Jump") && grounded)
         {
             velocity.y = jumpHeight; //sets y velocity
         }
