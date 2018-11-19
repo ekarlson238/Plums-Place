@@ -51,8 +51,15 @@ public class Movement : MonoBehaviour {
     [SerializeField]
     private GameObject shield;
 
+    private Checkpoint currentCheckpoint;
+
+    [SerializeField]
+    private Button deathButton;
+
     void Start()
     {
+        Time.timeScale = 1;
+
         rb = gameObject.GetComponent<Rigidbody2D>();
         grounded = true;
         canDash = false;
@@ -71,14 +78,39 @@ public class Movement : MonoBehaviour {
     {
         if (collision.gameObject.tag == "dashThrough" && !dashing) //if hits laser without dashing
         {
-            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+            Death();
         }
 
         if (collision.gameObject.tag == "Water") //if touches water
         {
-            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+            Death();
         }
         
+    }
+
+    private void Death()
+    {
+        deathButton.onClick.AddListener(DeathButtonPressed);
+        deathButton.gameObject.SetActive(true);
+        Time.timeScale = 0;
+        
+    }
+
+    private void DeathButtonPressed()
+    {
+        deathButton.gameObject.SetActive(false);
+
+        if (currentCheckpoint == null)
+        {
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+        }
+        else
+        {
+            Respawn();
+        }
+
+        Time.timeScale = 1;
+
     }
 
     void FixedUpdate()
@@ -202,14 +234,25 @@ public class Movement : MonoBehaviour {
         velocity.x = xAxis;
     }
 
-    void FreezeY()
+    private void FreezeY()
     {
         rb.constraints = RigidbodyConstraints2D.FreezeRotation| RigidbodyConstraints2D.FreezePositionY;
     }
 
-    void UnfreezeY()
+    private void UnfreezeY()
     {
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    public void SetCurrentCheckpoint(Checkpoint newCurrentCheckpoint)
+    {
+        currentCheckpoint = newCurrentCheckpoint;
+    }
+
+    private void Respawn()
+    {
+        rb.velocity = new Vector2(0, 0);
+        transform.position = currentCheckpoint.transform.position;
     }
 
 
