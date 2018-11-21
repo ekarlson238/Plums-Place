@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Movement : MonoBehaviour {
 
     [SerializeField]
-    private float spd;
+    private float speed;
+    private float speedSave;
+    private float halfSpeed;
 
     private float xAxis;
     private Rigidbody2D rb;
@@ -19,13 +22,13 @@ public class Movement : MonoBehaviour {
     private bool dashing;
 
     [SerializeField]
-    private float dashMult;
+    private float dashsSpeedMultiplier;
 
     private float dashVelocity;
 
     [SerializeField]
+    private float dashDurationSave;
     private float dashDuration;
-    private float dashVar;
     
     [SerializeField]
     private Animator animator;
@@ -34,78 +37,175 @@ public class Movement : MonoBehaviour {
     private GameObject playerSprite;
     private Vector3 originalScale;
 
+    [SerializeField]
+    private Collider2D groundDetectTrigger;
+    private Collider2D[] groundHitDetectionResults = new Collider2D[16];
+
+    [SerializeField]
+    private ContactFilter2D groundContactFilter;
+
+    private Vector2 velocity;
+
+    private float horizontalRawAxisValue;
+
+    [SerializeField]
+    private GameObject shield;
+
+    private Checkpoint currentCheckpoint;
+
+    [SerializeField]
+    private Button deathButton;
+
     void Start()
     {
+        Time.timeScale = 1;
+
         rb = gameObject.GetComponent<Rigidbody2D>();
         grounded = true;
         canDash = false;
         dashing = false;
-        dashVar = dashDuration;
+        dashDuration = dashDurationSave;
         originalScale = playerSprite.transform.localScale;
-    }
-    
 
-    //if the player collides with something tagged ground
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.tag == "Ground")
-        {
-            grounded = true; //let me jump again
-            canDash = false; //can't dash if grounded
+        velocity = rb.velocity;
+        speedSave = speed;
+        halfSpeed = speed / 2;
 
-            animator.SetBool("isJumping", false);
-        }
-
-
+        horizontalRawAxisValue = 1;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "dashThrough" && !dashing) //if hits laser without dashing
         {
-            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+            Death();
         }
 
         if (collision.gameObject.tag == "Water") //if touches water
         {
+            Death();
+        }
+        
+    }
+
+    private void Death()
+    {
+        deathButton.onClick.AddListener(DeathButtonPressed);
+        deathButton.gameObject.SetActive(true);
+        Time.timeScale = 0;
+        
+    }
+
+    private void DeathButtonPressed()
+    {
+        deathButton.gameObject.SetActive(false);
+
+        if (currentCheckpoint == null)
+        {
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
         }
-
-        if (collision.gameObject.tag == "Coin") //if touches coin
+        else
         {
-
+            Respawn();
         }
+
+        Time.timeScale = 1;
 
     }
 
     void FixedUpdate()
     {
-        //rotation
-        this.transform.eulerAngles = new Vector3(0, 0, 0);
+        UpdateGrounded();
 
-        //value for x velocity
-        xAxis = Input.GetAxisRaw("Horizontal") * spd;
+        SetHorizontalVelocity();
 
-        //set object's x velocity to xAxis
-        Vector2 VelocityX = rb.velocity;
-        VelocityX.x = xAxis;
-        
-        //jump
-        if (Input.GetButton("Jump") && grounded)
+        Jump();
+
+        Dash();
+
+        DashShield();
+
+        MovementDependingOnIfDashing();
+
+    }//fixedUpdate
+
+    private void DashShield()
+    {
+        if (dashing)
         {
-            VelocityX.y = jumpHeight; //sets y velocity
-            grounded = false;//test to see if already jumping
-            canDash = true;//can only dash while jumping
+            shield.GetComponent<SpriteRenderer>().enabled = true;
+        }
+        else
+        {
+            shield.GetComponent<SpriteRenderer>().enabled = false;
+        }
+    }
 
+    private void UpdateGrounded()
+    {
+        grounded = groundDetectTrigger.OverlapCollider(groundContactFilter, groundHitDetectionResults) > 0;
+        //Debug.Log("grounded =" + grounded);
+
+        if (grounded)
+        {
+            canDash = true; //landing on ground resets dash
+
+            animator.SetBool("isJumping", false);
+            speed = speedSave;
+        }
+        else
+        {
+            speed = halfSpeed;
             animator.SetBool("isJumping", true);
         }
+    }
 
-        //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
-        if (Input.GetButton("Fire3") && canDash && Input.GetAxisRaw("Horizontal") != 0)
+    private void MovementDependingOnIfDashing()
+    {
+        if (!dashing)//if you're not dashing
         {
-            dashVelocity = xAxis * dashMult;
+            rb.velocity = velocity; //sets velocity
+            animator.SetFloat("Speed", Mathf.Abs(velocity.x));
 
-            freezeY(); //freeze y position while dashing
+            MirrorPlayerSprite();
+
+        }
+        else//if you are dashing, continue to dash for dashDuration, then stop dashing
+        {
+            dashDuration -= Time.deltaTime;
+            if (dashDuration < 0)
+            {
+                dashing = false;
+                dashDuration = dashDurationSave;
+                UnfreezeY();
+
+                animator.SetBool("isDashing", false);
+            }
+        }
+    }
+
+    private void MirrorPlayerSprite()
+    {
+        if (Input.GetAxisRaw("Horizontal") < 0)
+        {
+            playerSprite.transform.localScale = new Vector3(-(originalScale.x), originalScale.y, originalScale.z);
+            horizontalRawAxisValue = Input.GetAxisRaw("Horizontal");
+        }
+        else if (Input.GetAxisRaw("Horizontal") > 0)
+        {
+            playerSprite.transform.localScale = originalScale;
+            horizontalRawAxisValue = Input.GetAxisRaw("Horizontal");
+        }
+    }
+
+    private void Dash()
+    {
+        //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
+        if (Input.GetButton("Fire3") && canDash && !grounded)
+        {
+            dashVelocity = horizontalRawAxisValue * speedSave * dashsSpeedMultiplier;
+
+            FreezeY(); //freeze y position while dashing
             rb.AddForce(new Vector2(dashVelocity, 0));
             dashing = true;
 
@@ -113,45 +213,46 @@ public class Movement : MonoBehaviour {
 
             animator.SetBool("isDashing", true);
         }
+    }
 
-        if (!dashing)//if you're not dashing
+    private void Jump()
+    {
+        //jump
+        if (Input.GetButtonDown("Jump") && grounded)
         {
-            rb.velocity = VelocityX; //sets velocity
-            animator.SetFloat("Speed", Mathf.Abs(VelocityX.x));
-
-            if (Input.GetAxisRaw("Horizontal") < 0)
-            {
-                playerSprite.transform.localScale = new Vector3(-(originalScale.x), originalScale.y, originalScale.z);
-            }
-            else if (Input.GetAxisRaw("Horizontal") > 0)
-            {
-                playerSprite.transform.localScale = originalScale;
-            }
-
+            velocity.y = jumpHeight; //sets y velocity
         }
-        else//if you are dashing, continue to dash for dashDuration, then stop dashing
-        {
-            dashVar -= Time.deltaTime;
-            if (dashVar < 0)
-            {
-                dashing = false;
-                dashVar = dashDuration;
-                unfreezeY();
+    }
 
-                animator.SetBool("isDashing", false);
-            }
-        }
+    private void SetHorizontalVelocity()
+    {
+        //value for x velocity
+        xAxis = Input.GetAxisRaw("Horizontal") * speed;
 
-    }//fixedUpdate
+        //set object's x velocity to xAxis
+        velocity = rb.velocity;
+        velocity.x = xAxis;
+    }
 
-    void freezeY()
+    private void FreezeY()
     {
         rb.constraints = RigidbodyConstraints2D.FreezeRotation| RigidbodyConstraints2D.FreezePositionY;
     }
 
-    void unfreezeY()
+    private void UnfreezeY()
     {
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    public void SetCurrentCheckpoint(Checkpoint newCurrentCheckpoint)
+    {
+        currentCheckpoint = newCurrentCheckpoint;
+    }
+
+    private void Respawn()
+    {
+        rb.velocity = new Vector2(0, 0);
+        transform.position = currentCheckpoint.transform.position;
     }
 
 

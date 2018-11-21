@@ -5,7 +5,6 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
-  - PLAYER
   - dashThrough
   - Water
   - Coin
@@ -18,7 +17,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - Ground
   - 
   - 
   - 
@@ -43,6 +42,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: UI
+    uniqueID: 1504730195
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
