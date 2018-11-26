@@ -2767,6 +2767,11 @@ Prefab:
       propertyPath: m_Pivot.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114845031224419066, guid: 7aaf40de325437e4f8b7baf94b239217,
+        type: 2}
+      propertyPath: m_FontData.m_VerticalOverflow
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7aaf40de325437e4f8b7baf94b239217, type: 2}
   m_IsPrefabParent: 0
