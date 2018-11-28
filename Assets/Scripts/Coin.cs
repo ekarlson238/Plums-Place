@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Coin : MonoBehaviour {
+public class Coin : MonoBehaviour
+{
     private static int coinCount_UseProperty;
     private CoinUI coinUI;
     private bool isCollected;
@@ -12,8 +13,6 @@ public class Coin : MonoBehaviour {
         {
             if (value >= 0)
                 coinCount_UseProperty = value;
-
-            
         }
         get
         {
@@ -36,14 +35,12 @@ public class Coin : MonoBehaviour {
                 CoinCount++;
                 coinUI.UpdateScoreText();
             }
-            
-
+            //Leaving this here so I know what I tried when I try to fix the coin collection bug again
             /*
             Destroy(collision.gameObject); //destroy the coin
             coinsCollected += 1; //add one to coins collected
             coinText.text = "Coins: " + coinsCollected + "/3";
             */
-
             /*
             if(collision.gameObject != null)
             {
@@ -52,12 +49,9 @@ public class Coin : MonoBehaviour {
                 Destroy(collision.gameObject); //destroy the coin
             }
             */
-
-
             gameObject.SetActive(false);
             //coinsCollected += 1; //add one to coins collected
             //coinText.text = "Coins: " + coinsCollected + "/3";
-
         }
     }
 }

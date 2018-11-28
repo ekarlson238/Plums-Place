@@ -4,74 +4,61 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class Movement : MonoBehaviour {
-
-    [SerializeField]
+public class Player : MonoBehaviour
+{
+    #region Serialized Fields
+    [SerializeField][Tooltip("How fast the player can move")]
     private float speed;
-    private float speedSave;
-    private float halfSpeed;
+    [SerializeField][Tooltip("How high the player can jump")]
+    private float jumpHeight;
+    [SerializeField][Tooltip("The number you multiply the base speed by to set the speed of a dash")]
+    private float dashsSpeedMultiplier;
+    [SerializeField][Tooltip("The duration of the dash")]
+    private float dashDurationSave;
+    [SerializeField][Tooltip("The player's animator")]
+    private Animator animator;
+    [SerializeField][Tooltip("The Player's sprite")]
+    private GameObject playerSprite;
+    [SerializeField][Tooltip("The circle collider under the player that checks ifGrounded")]
+    private Collider2D groundDetectTrigger;
+    [SerializeField]
+    private ContactFilter2D groundContactFilter;
+    [SerializeField][Tooltip("The player's shield Game Object")]
+    private GameObject shield;
+    [SerializeField][Tooltip("The button pressed when dead to respawn")]
+    private Button deathButton;
+    #endregion
 
+    #region Private Fields
+    private float speedSave; //saves the orignal base speed value so I can go back to it
+    private float halfSpeedSave; //saves the value of half the base speed so I can use it later
     private float xAxis;
     private Rigidbody2D rb;
-
-    [SerializeField]
-    private float jumpHeight;
-
     private bool grounded;
     private bool canDash;
     private bool dashing;
-
-    [SerializeField]
-    private float dashsSpeedMultiplier;
-
     private float dashVelocity;
-
-    [SerializeField]
-    private float dashDurationSave;
     private float dashDuration;
-    
-    [SerializeField]
-    private Animator animator;
-
-    [SerializeField]
-    private GameObject playerSprite;
     private Vector3 originalScale;
-
-    [SerializeField]
-    private Collider2D groundDetectTrigger;
     private Collider2D[] groundHitDetectionResults = new Collider2D[16];
-
-    [SerializeField]
-    private ContactFilter2D groundContactFilter;
-
     private Vector2 velocity;
-
-    private float horizontalRawAxisValue;
-
-    [SerializeField]
-    private GameObject shield;
-
+    private float horizontalRawAxisValueSave;  //this saves the last GetAxisRaw to represent the direction the player is facing
     private Checkpoint currentCheckpoint;
-
-    [SerializeField]
-    private Button deathButton;
+    #endregion
 
     void Start()
     {
         Time.timeScale = 1;
-
         rb = gameObject.GetComponent<Rigidbody2D>();
         grounded = true;
         canDash = false;
         dashing = false;
         dashDuration = dashDurationSave;
         originalScale = playerSprite.transform.localScale;
-
         velocity = rb.velocity;
         speedSave = speed;
-        halfSpeed = speed / 2;
-
-        horizontalRawAxisValue = 1;
+        halfSpeedSave = speed / 2;
+        horizontalRawAxisValueSave = 1; //the player starts facing to the right
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -155,7 +142,7 @@ public class Movement : MonoBehaviour {
         }
         else
         {
-            speed = halfSpeed;
+            speed = halfSpeedSave;
             animator.SetBool("isJumping", true);
         }
     }
@@ -189,12 +176,12 @@ public class Movement : MonoBehaviour {
         if (Input.GetAxisRaw("Horizontal") < 0)
         {
             playerSprite.transform.localScale = new Vector3(-(originalScale.x), originalScale.y, originalScale.z);
-            horizontalRawAxisValue = Input.GetAxisRaw("Horizontal");
+            horizontalRawAxisValueSave = Input.GetAxisRaw("Horizontal");
         }
         else if (Input.GetAxisRaw("Horizontal") > 0)
         {
             playerSprite.transform.localScale = originalScale;
-            horizontalRawAxisValue = Input.GetAxisRaw("Horizontal");
+            horizontalRawAxisValueSave = Input.GetAxisRaw("Horizontal");
         }
     }
 
@@ -203,7 +190,7 @@ public class Movement : MonoBehaviour {
         //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
         if (Input.GetButton("Fire3") && canDash && !grounded)
         {
-            dashVelocity = horizontalRawAxisValue * speedSave * dashsSpeedMultiplier;
+            dashVelocity = horizontalRawAxisValueSave * speedSave * dashsSpeedMultiplier;
 
             FreezeY(); //freeze y position while dashing
             rb.AddForce(new Vector2(dashVelocity, 0));

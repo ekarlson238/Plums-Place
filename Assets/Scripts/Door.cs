@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Door : MonoBehaviour {
-
+public class Door : MonoBehaviour
+{
     [SerializeField]
     private string nextScene;
 
@@ -14,6 +14,5 @@ public class Door : MonoBehaviour {
         {
             SceneManager.LoadScene(nextScene);
         }
-
     }
 }
