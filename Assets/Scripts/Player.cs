@@ -34,9 +34,9 @@ public class Player : MonoBehaviour
     private float halfSpeedSave; //saves the value of half the base speed so I can use it later
     private float xAxis;
     private Rigidbody2D rb;
-    private bool grounded;
+    private bool isGrounded;
     private bool canDash;
-    private bool dashing;
+    private bool isDashing;
     private float dashVelocity;
     private float dashDuration;
     private Vector3 originalScale;
@@ -44,49 +44,57 @@ public class Player : MonoBehaviour
     private Vector2 velocity;
     private float horizontalRawAxisValueSave;  //this saves the last GetAxisRaw to represent the direction the player is facing
     private Checkpoint currentCheckpoint;
+    private SpriteRenderer shieldSprite;
     #endregion
 
-    void Start()
+    private void Start()
     {
         Time.timeScale = 1;
         rb = gameObject.GetComponent<Rigidbody2D>();
-        grounded = true;
+        isGrounded = true;
         canDash = false;
-        dashing = false;
+        isDashing = false;
         dashDuration = dashDurationSave;
         originalScale = playerSprite.transform.localScale;
         velocity = rb.velocity;
         speedSave = speed;
         halfSpeedSave = speed / 2;
         horizontalRawAxisValueSave = 1; //the player starts facing to the right
+        deathButton.onClick.AddListener(DeathButtonPressed);
+        shieldSprite = shield.GetComponent<SpriteRenderer>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "dashThrough" && !dashing) //if hits laser without dashing
-        {
-            Death();
-        }
-
-        if (collision.gameObject.tag == "Water") //if touches water
-        {
-            Death();
-        }
-        
+        KillPlayerUponEnteringLaserIfNotDashing(collision);
+        KillPlayerUponTouchingWater(collision);
     }
 
-    private void Death()
+    private void KillPlayerUponTouchingWater(Collider2D collision)
     {
-        deathButton.onClick.AddListener(DeathButtonPressed);
+        if (collision.gameObject.tag == "Water")
+        {
+            Die();
+        }
+    }
+
+    private void KillPlayerUponEnteringLaserIfNotDashing(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "dashThrough" && !isDashing)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
         deathButton.gameObject.SetActive(true);
-        Time.timeScale = 0;
-        
+        Time.timeScale = 0; //pause the game until the respawn button is pressed
     }
 
     private void DeathButtonPressed()
     {
         deathButton.gameObject.SetActive(false);
-
         if (currentCheckpoint == null)
         {
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
@@ -95,83 +103,82 @@ public class Player : MonoBehaviour
         {
             Respawn();
         }
-
-        Time.timeScale = 1;
-
+        Time.timeScale = 1; //unpause game after respawning
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        UpdateGrounded();
-
+        UpdateIsGrounded();
         SetHorizontalVelocity();
-
         Jump();
-
         Dash();
-
-        DashShield();
-
+        ShowShieldSpriteWhileDashing();
         MovementDependingOnIfDashing();
+    }
 
-    }//fixedUpdate
-
-    private void DashShield()
+    private void ShowShieldSpriteWhileDashing()
     {
-        if (dashing)
+        if (isDashing)
         {
-            shield.GetComponent<SpriteRenderer>().enabled = true;
+            shieldSprite.enabled = true;
         }
         else
         {
-            shield.GetComponent<SpriteRenderer>().enabled = false;
+            shieldSprite.enabled = false;
         }
     }
 
-    private void UpdateGrounded()
+    private void UpdateIsGrounded()
     {
-        grounded = groundDetectTrigger.OverlapCollider(groundContactFilter, groundHitDetectionResults) > 0;
-        //Debug.Log("grounded =" + grounded);
-
-        if (grounded)
+        isGrounded = groundDetectTrigger.OverlapCollider(groundContactFilter, groundHitDetectionResults) > 0;
+        if (isGrounded)
         {
             canDash = true; //landing on ground resets dash
 
-            animator.SetBool("isJumping", false);
+            animator.SetBool("isNotOnGround", false);
             speed = speedSave;
         }
         else
         {
             speed = halfSpeedSave;
-            animator.SetBool("isJumping", true);
+            animator.SetBool("isNotOnGround", true);
         }
     }
 
+    /// <summary>
+    /// If you aren't dashing, you move by setting velocity.
+    /// If you are dashing, continue to dash for dashDuration then stop dashing, unfreeze Y position, and reset dashDuration
+    /// </summary>
     private void MovementDependingOnIfDashing()
     {
-        if (!dashing)//if you're not dashing
+        if (!isDashing)
         {
-            rb.velocity = velocity; //sets velocity
+            rb.velocity = velocity;
             animator.SetFloat("Speed", Mathf.Abs(velocity.x));
-
-            MirrorPlayerSprite();
-
+            MirrorPlayerSpriteWhenDirectionChanges();
         }
-        else//if you are dashing, continue to dash for dashDuration, then stop dashing
+        else
         {
-            dashDuration -= Time.deltaTime;
-            if (dashDuration < 0)
-            {
-                dashing = false;
-                dashDuration = dashDurationSave;
-                UnfreezeY();
-
-                animator.SetBool("isDashing", false);
-            }
+            StopDashing();
         }
     }
 
-    private void MirrorPlayerSprite()
+    private void StopDashing()
+    {
+        dashDuration -= Time.deltaTime;
+        if (dashDuration < 0)
+        {
+            isDashing = false;
+            dashDuration = dashDurationSave;
+            UnfreezeY();
+            animator.SetBool("isDashing", false);
+        }
+    }
+
+    /// <summary>
+    /// Faces the player sprite in the direction the player has moved
+    /// </summary>
+    private void MirrorPlayerSpriteWhenDirectionChanges()
     {
         if (Input.GetAxisRaw("Horizontal") < 0)
         {
@@ -185,38 +192,37 @@ public class Player : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// press shift to dash in the direction you're facing if you haven't dashed before and you are not grounded
+    /// </summary>
     private void Dash()
     {
-        //press shift to dash if you haven't dashed before, you are not grounded, and you are moving in a horizonal direction
-        if (Input.GetButton("Fire3") && canDash && !grounded)
+        if (Input.GetButton("Fire3") && canDash && !isGrounded)
         {
             dashVelocity = horizontalRawAxisValueSave * speedSave * dashsSpeedMultiplier;
-
-            FreezeY(); //freeze y position while dashing
+            FreezeY();
             rb.AddForce(new Vector2(dashVelocity, 0));
-            dashing = true;
-
-            canDash = false; //can only dash once per jump
-
+            isDashing = true;
+            canDash = false;
             animator.SetBool("isDashing", true);
         }
     }
 
     private void Jump()
     {
-        //jump
-        if (Input.GetButtonDown("Jump") && grounded)
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            velocity.y = jumpHeight; //sets y velocity
+            velocity.y = jumpHeight;
         }
     }
 
+    /// <summary>
+    /// xAxis is the velocity on the x axis
+    /// This takes the player's velocity in all directions and overrides x velocity
+    /// </summary>
     private void SetHorizontalVelocity()
     {
-        //value for x velocity
         xAxis = Input.GetAxisRaw("Horizontal") * speed;
-
-        //set object's x velocity to xAxis
         velocity = rb.velocity;
         velocity.x = xAxis;
     }
