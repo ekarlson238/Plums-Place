@@ -8,6 +8,7 @@ TagManager:
   - dashThrough
   - Water
   - Coin
+  - PLAYER
   layers:
   - Default
   - TransparentFX
