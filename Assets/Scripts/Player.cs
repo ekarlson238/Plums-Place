@@ -97,6 +97,7 @@ public class Player : MonoBehaviour
         deathButton.gameObject.SetActive(false);
         if (currentCheckpoint == null)
         {
+            Coin.CoinCount = 0;
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
         }
         else
