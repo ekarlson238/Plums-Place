@@ -717,7 +717,9 @@ MonoBehaviour:
 
     Art by Grim Workbench, Bayat Games, and Evan Karlson
 
-    Music by BenSound'
+    Music by BenSound
+
+    Button Sound by acclivity@FreeSound.org'
 --- !u!222 &1064996275
 CanvasRenderer:
   m_ObjectHideFlags: 0

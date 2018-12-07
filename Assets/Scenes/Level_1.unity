@@ -2852,6 +2852,16 @@ Prefab:
       propertyPath: m_Name
       value: Coin (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 114011615063904662, guid: 1df8ef10b87c5844ca43fb5d806a7bad,
+        type: 2}
+      propertyPath: audio
+      value: 
+      objectReference: {fileID: 8300000, guid: f7a3bcc6236d9fe46afddcabb71b0e5a, type: 3}
+    - target: {fileID: 82486720746912578, guid: 1df8ef10b87c5844ca43fb5d806a7bad,
+        type: 2}
+      propertyPath: m_Volume
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1df8ef10b87c5844ca43fb5d806a7bad, type: 2}
   m_IsPrefabParent: 0

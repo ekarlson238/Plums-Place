@@ -26,6 +26,9 @@ public class Coin : MonoBehaviour
     public static int levelThreeCoinCount;
     #endregion
 
+    [SerializeField]
+    private AudioClip collectSound;
+
     private void Awake()
     {
         coinUI = GameObject.Find("CoinsCollectedUI").GetComponent<CoinUI>();
@@ -37,6 +40,7 @@ public class Coin : MonoBehaviour
         {
             if (!isCollected)
             {
+                AudioSource.PlayClipAtPoint(collectSound, transform.position);
                 isCollected = true;
                 CoinCount++;
                 coinUI.UpdateScoreText();
