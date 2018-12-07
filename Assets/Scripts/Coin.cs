@@ -21,9 +21,9 @@ public class Coin : MonoBehaviour
     }
 
     #region Levels Coins
-    public static int LevelOneCoinCount;
-    public static int LevelTwoCoinCount;
-    public static int LevelThreeCoinCount;
+    public static int levelOneCoinCount;
+    public static int levelTwoCoinCount;
+    public static int levelThreeCoinCount;
     #endregion
 
     private void Awake()

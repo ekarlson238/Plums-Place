@@ -14,15 +14,15 @@ public class Door : MonoBehaviour
         {
             if (SceneManager.GetActiveScene().name == "Level_1")
             {
-                Coin.LevelOneCoinCount = Coin.CoinCount;
+                Coin.levelOneCoinCount = Coin.CoinCount;
             }
             if (SceneManager.GetActiveScene().name == "Level_2")
             {
-                Coin.LevelTwoCoinCount = Coin.CoinCount;
+                Coin.levelTwoCoinCount = Coin.CoinCount;
             }
             if (SceneManager.GetActiveScene().name == "Level_3")
             {
-                Coin.LevelThreeCoinCount = Coin.CoinCount;
+                Coin.levelThreeCoinCount = Coin.CoinCount;
             }
             Coin.CoinCount = 0;
             SceneManager.LoadScene(nextScene);
