@@ -2404,11 +2404,6 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 114112232009917810, guid: 0776a062bfb65cf4496c8f3bb738d671,
         type: 2}
-      propertyPath: deathUI
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 114112232009917810, guid: 0776a062bfb65cf4496c8f3bb738d671,
-        type: 2}
       propertyPath: deathButton
       value: 
       objectReference: {fileID: 1447603458}

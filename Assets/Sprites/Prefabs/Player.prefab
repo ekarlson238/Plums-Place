@@ -467,9 +467,9 @@ GameObject:
   - component: {fileID: 4445352210893990}
   - component: {fileID: 212144752713562216}
   - component: {fileID: 50062134328193144}
-  - component: {fileID: 61977902494824312}
   - component: {fileID: 114112232009917810}
   - component: {fileID: 58713276605794794}
+  - component: {fileID: 60820343576239870}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -992,7 +992,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4791993646297032}
-  - component: {fileID: 58030645974824922}
   m_Layer: 0
   m_Name: head
   m_TagString: Untagged
@@ -2481,21 +2480,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!58 &58030645974824922
-CircleCollider2D:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1661485603517538}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 6200000, guid: 559d65755f37fd64986a004541257a4a, type: 2}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.46
 --- !u!58 &58713276605794794
 CircleCollider2D:
   m_ObjectHideFlags: 1
@@ -2511,8 +2495,8 @@ CircleCollider2D:
   m_Offset: {x: 0, y: -0.43}
   serializedVersion: 2
   m_Radius: 0.27
---- !u!61 &61977902494824312
-BoxCollider2D:
+--- !u!60 &60820343576239870
+PolygonCollider2D:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -2533,9 +2517,14 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Points:
+    m_Paths:
+    - - {x: -0.22238913, y: -0.49999946}
+      - {x: -0.849585, y: 0.20099987}
+      - {x: 0.13520612, y: 0.53789145}
+      - {x: 0.95883036, y: 0.47508353}
+      - {x: 0.6751683, y: 0.14345346}
+      - {x: 0.23445143, y: -0.5007134}
 --- !u!81 &81381534257092922
 AudioListener:
   m_ObjectHideFlags: 1
@@ -2594,6 +2583,7 @@ MonoBehaviour:
     minNormalAngle: 0
     maxNormalAngle: 0
   shield: {fileID: 1201381315337960}
+  deathButton: {fileID: 0}
 --- !u!212 &212000379762172646
 SpriteRenderer:
   m_ObjectHideFlags: 1
