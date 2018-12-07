@@ -9,6 +9,7 @@ TagManager:
   - Water
   - Coin
   - PLAYER
+  - Music
   layers:
   - Default
   - TransparentFX
